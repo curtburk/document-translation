@@ -1,68 +1,52 @@
 # Document Translation Demo
+### This demo was created during my time as an AI Product Manager at HP
+
+A demonstration application showcasing multilingual translation capabilities using Meta's NLLB-200 (No Language Left Behind) model. This demo is designed for HP ZGX Nano sales and marketing teams to showcase AI-powered translation at events.
 
 ## Overview
 
-The Document Translation Demo showcases the HP ZGX Nano AI Station's ability to perform real-time multilingual translation using Meta's NLLB-200 (No Language Left Behind) model. This demonstration highlights how enterprise-grade translation capabilities can run entirely on local hardware without requiring cloud services or external API dependencies.
+This demo provides a web-based interface for translating text between 27 languages using the NLLB-200-distilled-600M model. The application features a FastAPI backend that handles model loading and translation requests, paired with an HTML frontend for easy interaction.
 
-The demo provides a web-based interface where users can translate text between English and 27 different languages, demonstrating the ZGX Nano's capacity for natural language processing workloads.
+### Key Features
 
-## Model Information
+- Support for 54 language pair combinations (27 languages to/from English)
+- Real-time translation through an intuitive web interface
+- On-demand model loading to optimize resource usage
+- Sample text buttons for quick demonstrations
+- Visual model status indicator
 
-This demo uses the NLLB-200 distilled model from Meta:
+### Supported Languages
 
-- **Model**: facebook/nllb-200-distilled-600M
-- **Parameters**: ~600 million (distilled version for efficient inference)
-- **Capabilities**: Supports translation between 200 languages with high quality
-- **Memory Requirements**: Approximately 2-4GB VRAM when loaded in float16 precision
-
-## Supported Languages
-
-The demo supports bidirectional translation between English and the following 27 languages:
-
-| Language | Language | Language |
-|----------|----------|----------|
-| Arabic | French | Polish |
-| Chinese | German | Portuguese |
-| Croatian | Hungarian | Romanian |
-| Czech | Indonesian | Russian |
-| Danish | Italian | Swedish |
-| Dutch | Japanese | Thai |
-| Finnish | Korean | Turkish |
-| | Malay | Ukrainian |
-| | Norwegian | Vietnamese |
-| | Norwegian Bokmal | |
+The demo supports translation between English and the following languages: Arabic, Chinese, Croatian, Czech, Danish, Dutch, Finnish, French, German, Hungarian, Indonesian, Italian, Japanese, Korean, Malay, Norwegian, Norwegian Bokmal, Polish, Portuguese, Romanian, Russian, Spanish, Swedish, Thai, Turkish, Ukrainian, and Vietnamese.
 
 ## System Requirements
 
-- HP ZGX Nano AI Station (or compatible NVIDIA GPU system)
-- Ubuntu 22.04 or later
-- Python 3.10 or later
-- NVIDIA GPU with at least 4GB VRAM (8GB+ recommended)
-- CUDA toolkit and drivers installed
-- Network connectivity for initial model download
+- HP ZGX Nano AI Station (or compatible Linux system with NVIDIA GPU)
+- Python 3.x
+- CUDA-compatible GPU with 8GB+ VRAM recommended
+- Active network connection for initial model download
 
 ## Directory Structure
 
 ```
-document-translation-demo/
+document-translate/
 ├── backend/
 │   ├── main.py              # FastAPI backend server
 │   └── requirements.txt     # Python dependencies
 ├── frontend/
 │   ├── index.html           # Web interface
 │   └── hp_logo.png          # HP branding asset
-├── document-translate-env/  # Python virtual environment
+├── document-translate-env/  # Virtual environment (must exist before install)
 ├── install.sh               # Installation script
 ├── start_demo_remote.sh     # Demo startup script
-├── download_models.sh       # Model download script (S3)
-└── README.md                # This documentation
+└── download_models.sh       # Model download from S3 (optional)
 ```
 
 ## Installation
 
 ### Step 1: Create the Virtual Environment
 
-Before running the installation script, create the required Python virtual environment:
+Before running the installation script, you must create the virtual environment:
 
 ```bash
 python3 -m venv document-translate-env
@@ -75,179 +59,153 @@ chmod +x install.sh
 ./install.sh
 ```
 
-The installation script will activate the virtual environment and install all required Python dependencies.
+The installation script will:
+- Verify Python 3 is installed
+- Activate the existing virtual environment
+- Upgrade pip
+- Install all required Python dependencies
 
-### Step 3: Model Download Options
-
-The NLLB-200 model can be obtained in two ways:
-
-**Option A: Automatic Download from Hugging Face (Recommended)**
-
-The model will download automatically from Hugging Face when you click "Load Models" in the web interface. This requires internet connectivity and will cache the model locally for future use.
-
-**Option B: Pre-download from S3 (Air-gapped environments)**
-
-If you have pre-staged the model in an S3 bucket, use the download script:
-
-```bash
-chmod +x download_models.sh
-./download_models.sh
-```
-
-This downloads the model to the Hugging Face cache directory at `~/.cache/huggingface/hub/models--facebook--nllb-200-distilled-600M/`.
-
-## Configuration
-
-### SALES TEAM CALLOUT: Server IP Address Configuration
-
-The demo requires configuration of the server IP address to allow access from other machines on the network.
-
-**File to modify**: `frontend/index.html`
-
-**Line to update** (Line 360):
-```javascript
-const API_URL = 'http://192.168.10.117:8000';
-```
-
-**Action required**: Replace `192.168.10.117` with the actual IP address of the HP ZGX Nano running the demo.
-
-**How to find the server IP address**:
-```bash
-hostname -I | awk '{print $1}'
-```
-
-**Note**: The `start_demo_remote.sh` script automatically updates this value when launched. However, if you need to run the frontend separately or the automatic detection fails, manual configuration may be required.
-
-### Port Configuration
-
-The demo uses the following network ports:
-
-| Service | Port | Purpose |
-|---------|------|---------|
-| Backend API | 8000 | FastAPI server handling translation requests |
-| Frontend | 8080 | Web interface served via Python HTTP server |
-
-Ensure these ports are not blocked by firewalls and are available on the system.
-
-## Running the Demo
-
-### Starting the Demo
+### Step 3: Start the Demo
 
 ```bash
 chmod +x start_demo_remote.sh
 ./start_demo_remote.sh
 ```
 
-The startup script performs the following actions:
+The startup script will:
+- Detect and display your server IP address
+- Clean up any processes on ports 8000 and 8080
+- Start the FastAPI backend on port 8000
+- Start the frontend web server on port 8080
+- Automatically update the frontend to use your server IP
 
-1. Detects the server IP address automatically
-2. Terminates any existing processes on ports 8000 and 8080
-3. Activates the Python virtual environment
-4. Starts the FastAPI backend server
-5. Updates the frontend configuration with the detected IP address
-6. Starts the frontend web server
-7. Displays access URLs for the demo
+## Configuration for Sales Teams
 
-### Accessing the Demo
+**CRITICAL:** The following items require modification when deploying to different environments.
 
-Once the demo is running, access the web interface from any browser on the network:
+### Server IP Address
+
+The `start_demo_remote.sh` script automatically detects your server IP. However, a fallback IP is hard-coded:
+
+**File:** `start_demo_remote.sh`
+```bash
+SERVER_IP=$(hostname -I | awk '{print $1}')
+if [ -z "$SERVER_IP" ]; then
+    SERVER_IP="192.168.10.117"  # <-- UPDATE THIS FALLBACK IP
+fi
+```
+
+**File:** `frontend/index.html`
+```javascript
+const API_URL = 'http://192.168.10.117:8000';  // <-- This is updated automatically by start script
+```
+
+The startup script modifies `index.html` automatically, but if running manually, update the `API_URL` to match your server.
+
+### S3 Model Download (Optional)
+
+If using the S3 model download script, update the bucket path:
+
+**File:** `download_models.sh`
+```bash
+aws s3 cp s3://finetuning-demo-models/nllb-200-distilled-600M/ ~/.cache/huggingface/hub/models--facebook--nllb-200-distilled-600M/ --recursive
+```
+
+Update `finetuning-demo-models` to your organization's S3 bucket if applicable.
+
+## Running the Demo
+
+### Accessing the Interface
+
+After starting the demo, access it from any device on the same network:
 
 ```
-http://[SERVER_IP]:8080
+http://YOUR_SERVER_IP:8080
 ```
 
-Replace `[SERVER_IP]` with the IP address displayed by the startup script.
+The startup script displays the exact URL to use.
 
-## Demo Workflow
-
-### Step 1: Load the Translation Model
+### Demo Workflow
 
 1. Open the web interface in your browser
-2. Click the "Load Models" button in the status bar
-3. Wait for the model to load (this may take 1-2 minutes on first run)
-4. The status indicator will turn green when models are ready
+2. Click the "Load Models" button (first-time load takes 1-2 minutes)
+3. Wait for the status indicator to turn green
+4. Select a language pair from the dropdown menu
+5. Enter text to translate or click a sample text button
+6. Click "Translate Text" to see the translation
 
-### Step 2: Select a Language Pair
+### Stopping the Demo
 
-1. Use the "Select Language Pair" dropdown menu
-2. Choose from English to another language, or from another language to English
-3. Language pairs are organized into two groups for easy navigation
+Press `Ctrl+C` in the terminal running the startup script. This cleanly shuts down both the backend and frontend servers.
 
-### Step 3: Enter or Select Text
+## Model Information
 
-1. Type or paste text into the "Source Text" area
-2. Alternatively, click one of the "Sample" buttons to load pre-defined example text
-3. There is no strict character limit, but shorter texts translate faster
+This demo uses:
+- **Model:** facebook/nllb-200-distilled-600M
+- **Size:** ~600M parameters (~1.2GB on disk)
+- **Precision:** float16 (for reduced memory usage)
+- **Source:** Hugging Face Hub (downloaded on first load) or optional S3 pre-download
 
-### Step 4: Translate
-
-1. Click the "Translate Text" button
-2. Wait for the translation to complete (typically 1-5 seconds depending on text length)
-3. The translated text appears in the "Translation" panel on the right
-
+The model is loaded on-demand when you click "Load Models" in the interface. Initial loading downloads from Hugging Face if not cached locally.
 
 ## Troubleshooting
 
-### Models fail to load
+### "Models not loaded" Error
 
-**Symptoms**: Error message when clicking "Load Models" or timeout during loading.
+Click the "Load Models" button in the web interface before attempting to translate. The status indicator should turn green when models are ready.
 
-**Possible causes and solutions**:
+### Cannot Connect to Backend
 
-- **Insufficient GPU memory**: Ensure no other applications are using the GPU. Run `nvidia-smi` to check GPU memory usage.
-- **CUDA not available**: Verify CUDA is installed correctly with `python3 -c "import torch; print(torch.cuda.is_available())"`.
-- **Network issues**: If downloading from Hugging Face, ensure internet connectivity. Check if you need to configure proxy settings.
+1. Verify the backend is running:
+   ```bash
+   curl http://localhost:8000/
+   ```
+2. Check that port 8000 is not blocked by firewall
+3. Ensure the `API_URL` in `index.html` matches your server IP
 
-### Cannot access web interface from another machine
+### Port Already in Use
 
-**Symptoms**: Browser shows "connection refused" or page does not load.
+The startup script automatically kills processes on ports 8000 and 8080. If issues persist:
+```bash
+lsof -ti:8000 | xargs kill -9
+lsof -ti:8080 | xargs kill -9
+```
 
-**Possible causes and solutions**:
+### Translation Errors
 
-- **Wrong IP address**: Verify the IP address in `frontend/index.html` matches the server's actual IP.
-- **Firewall blocking ports**: Ensure ports 8000 and 8080 are open. On Ubuntu: `sudo ufw allow 8000` and `sudo ufw allow 8080`.
-- **Services not running**: Check that both backend and frontend processes are active using `lsof -i:8000` and `lsof -i:8080`.
+- Ensure the selected language pair is supported
+- Check that the input text is not empty
+- Verify model loaded successfully (green status indicator)
+- Monitor terminal for error messages
 
-### Translation returns error
+### Virtual Environment Not Found
 
-**Symptoms**: Error message appears instead of translated text.
+If you see "Virtual environment 'document-translate-env' not found":
+```bash
+python3 -m venv document-translate-env
+```
+Then re-run the installation script.
 
-**Possible causes and solutions**:
+## Demo Tips for Sales Teams
 
-- **Models not loaded**: Ensure you clicked "Load Models" and waited for the green status indicator.
-- **Unsupported language pair**: Verify the selected language pair is in the supported list.
-- **Text too long**: Try with shorter text to rule out memory issues.
+- Load models before the audience arrives (takes 1-2 minutes)
+- Use the sample text buttons for quick, consistent demonstrations
+- Start with English to French or Spanish translations for familiar results
+- Show bidirectional translation by switching language pairs
+- Demonstrate multiple languages to showcase the model's breadth
+- Keep translations concise for faster response times
 
-### Startup script fails
+## Files Reference
 
-**Symptoms**: Error messages during `./start_demo_remote.sh` execution.
+| File | Purpose |
+|------|---------|
+| `main.py` | FastAPI backend handling model loading and translation requests |
+| `index.html` | Web interface with language selection and translation display |
+| `requirements.txt` | Python package dependencies |
+| `install.sh` | One-time installation script |
+| `start_demo_remote.sh` | Demo startup script with auto-IP detection |
+| `download_models.sh` | Optional S3 model pre-download script |
 
-**Possible causes and solutions**:
+## Support
 
-- **Virtual environment not found**: Ensure `document-translate-env` directory exists in the demo folder. Re-run installation if needed.
-- **Port already in use**: Another application may be using ports 8000 or 8080. The script attempts to kill existing processes, but manual intervention may be needed: `sudo lsof -ti:8000 | xargs kill -9`.
-
-### Slow translation performance
-
-**Symptoms**: Translations take longer than expected (more than 10 seconds for short text).
-
-**Possible causes and solutions**:
-
-- **CPU fallback**: The model may be running on CPU instead of GPU. Check GPU utilization with `nvidia-smi` during translation.
-- **Thermal throttling**: Ensure the ZGX Nano has adequate cooling and is not throttling.
-- **First inference**: The first translation after loading may be slower due to CUDA kernel compilation. Subsequent translations should be faster.
-
-## Stopping the Demo
-
-Press `Ctrl+C` in the terminal where `start_demo_remote.sh` is running. The script will automatically:
-
-1. Terminate the backend API server
-2. Terminate the frontend web server
-3. Restore the original IP configuration in `index.html`
-
-## Technical Notes
-
-- The model runs in float16 precision to reduce memory usage while maintaining translation quality
-- The backend uses FastAPI with CORS enabled to allow cross-origin requests from the frontend
-- Translation uses beam search with 5 beams for improved output quality
-- Maximum input length is 512 tokens; longer texts are automatically truncated
+If you have questions about this demo contact Curtis Burkhalter at curtisburkhalter@gmail.com
