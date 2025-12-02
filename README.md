@@ -1,5 +1,4 @@
 # Document Translation Demo
-### This demo was created during my time as an AI Product Manager at HP
 
 A demonstration application showcasing multilingual translation capabilities using Meta's NLLB-200 (No Language Left Behind) model. This demo is designed for HP ZGX Nano sales and marketing teams to showcase AI-powered translation at events.
 
